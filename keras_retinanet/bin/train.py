@@ -190,6 +190,10 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
             # monitor="mAP",
             # mode='max'
         )
+        # symbolic_weights = getattr(model.optimizer, 'weights')
+        # weight_values = K.batch_get_value(symbolic_weights)
+        # with open('optimizer.pkl', 'wb') as f:
+        #     pickle.dump(weight_values, f)
         checkpoint = RedirectModel(checkpoint, model)
         callbacks.append(checkpoint)
 
@@ -535,7 +539,7 @@ def main(args=None):
         validation_generator = None
 
     # start training
-    return training_model.fit_generator(
+    model_history =  training_model.fit_generator(
         generator=train_generator,
         steps_per_epoch=args.steps,
         epochs=args.epochs,
@@ -547,6 +551,21 @@ def main(args=None):
         validation_data=validation_generator,
         initial_epoch=args.initial_epoch
     )
+    # makedirs(args.snapshot_path)
+    model_path = os.path.join(args.snapshot_path,
+                '{{epoch:02d}}.h5'
+            )
+
+    training_model.save(
+    model_path,
+    overwrite=True,
+    include_optimizer=True,
+    save_format=None,
+    signatures=None,
+    options=None,
+    save_traces=True,
+)
+    return model_history
 
 
 if __name__ == '__main__':
