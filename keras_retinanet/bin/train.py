@@ -24,6 +24,8 @@ import numpy as np
 from tensorflow import keras
 import tensorflow as tf
 import pickle
+from keras import backend as K  
+
 # Allow relative imports when being executed as script.
 if __name__ == "__main__" and __package__ is None:
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -119,17 +121,17 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
     prediction_model = retinanet_bbox(model=model, anchor_params=anchor_params, pyramid_levels=pyramid_levels)
 
     optimizer = keras.optimizers.Adam(lr=lr, clipnorm=optimizer_clipnorm)
-    opt_weights = np.load('/content/gdrive/MyDrive/Models/optimizer.npy', allow_pickle=True)
+#     opt_weights = np.load('/content/gdrive/MyDrive/Models/optimizer.npy', allow_pickle=True)
 
-    with tf.GradientTape() as tape:
-        tmp = training_model('')
-        loss = tf.reduce_mean((tmp - tmp)**2)
+#     with tf.GradientTape() as tape:
+#         tmp = training_model('')
+#         loss = tf.reduce_mean((tmp - tmp)**2)
 
-    gradients = tape.gradient(loss, training_model.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, training_model.trainable_variables))
+#     gradients = tape.gradient(loss, training_model.trainable_variables)
+#     optimizer.apply_gradients(zip(gradients, training_model.trainable_variables))
 
-# set the weights
-    optimizer.set_weights(opt_weights)
+# # set the weights
+#     optimizer.set_weights(opt_weights)
 
     # compile model
     training_model.compile(
@@ -566,14 +568,16 @@ def main(args=None):
         initial_epoch=args.initial_epoch
     )
     # makedirs(args.snapshot_path)
-    # ckpt_path = os.path.join(args.snapshot_path,
-    #             '{{epoch:02d}}'
+    ckpt_path = os.path.join(args.snapshot_path,
+              'optimizer.pkl')
     #         )
     # ckpt = tf.train.Checkpoint(model=training_model, optimizer=training_model.optimizer)
     # ckpt.save(ckpt_path)
-    import numpy as np
-    np.save(f'{args.snapshot_path}/optimizer.npy', training_model.optimizer.get_weights())
 
+    symbolic_weights = getattr(training_model.optimizer, 'weights')
+    weight_values = K.batch_get_value(symbolic_weights)
+    with open(ckpt_path, 'wb') as f:
+        pickle.dump(weight_values, f)
     # training_model.save(
     # model_path,
     # overwrite=True,
