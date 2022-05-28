@@ -129,7 +129,8 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
             'classification': losses.focal()
         },
         optimizer=optimizer)
-    
+        
+    training_model._make_train_function()
     with open('/content/gdrive/MyDrive/Models/optimizer.pkl', 'rb') as f:
         weight_values = pickle.load(f)
 
