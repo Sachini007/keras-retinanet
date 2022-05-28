@@ -542,14 +542,27 @@ def main(args=None):
 
     if not args.compute_val_loss:
         validation_generator = None
-
-    training_model.make_train_function()
+    
     with open('/content/gdrive/MyDrive/Models/optimizer.pkl', 'rb') as f:
         weight_values = pickle.load(f)
 
-    training_model.optimizer.set_weights(weight_values)
-    
     # start training
+    model_history =  training_model.fit_generator(
+        generator=train_generator,
+        steps_per_epoch=2,
+        epochs=1,
+        verbose=1,
+        callbacks=callbacks,
+        workers=args.workers,
+        use_multiprocessing=args.multiprocessing,
+        max_queue_size=args.max_queue_size,
+        validation_data=validation_generator,
+        initial_epoch=args.initial_epoch
+    )
+
+    training_model.make_train_function()
+    training_model.optimizer.set_weights(weight_values)
+    # makedirs(args.snapshot_path)
     model_history =  training_model.fit_generator(
         generator=train_generator,
         steps_per_epoch=args.steps,
@@ -562,7 +575,7 @@ def main(args=None):
         validation_data=validation_generator,
         initial_epoch=args.initial_epoch
     )
-    # makedirs(args.snapshot_path)
+
     ckpt_path = os.path.join(args.snapshot_path,
               'optimizer.pkl')
     #         )
