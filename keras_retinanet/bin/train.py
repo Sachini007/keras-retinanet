@@ -556,8 +556,10 @@ def main(args=None):
     ckpt_path = os.path.join(args.snapshot_path,
                 '{{epoch:02d}}'
             )
-    ckpt = tf.train.Checkpoint(model=training_model, optimizer=training_model.optimizer)
-    ckpt.save(ckpt_path)
+    # ckpt = tf.train.Checkpoint(model=training_model, optimizer=training_model.optimizer)
+    # ckpt.save(ckpt_path)
+    import numpy as np
+    np.save(f'{ckpt_path}/optimizer.npy', training_model.optimizer.get_weights())
 
     # training_model.save(
     # model_path,
