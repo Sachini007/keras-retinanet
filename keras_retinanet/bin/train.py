@@ -207,7 +207,7 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
         cooldown   = 0,
         min_lr     = 0
     ))
-    callbacks.append(tf.train.Checkpoint(model=model, optimizer=model.optimizer))
+    
     
     if args.evaluation and validation_generator:
         callbacks.append(keras.callbacks.EarlyStopping(
@@ -553,19 +553,21 @@ def main(args=None):
         initial_epoch=args.initial_epoch
     )
     # makedirs(args.snapshot_path)
-    model_path = os.path.join(args.snapshot_path,
-                '{{epoch:02d}}.h5'
+    ckpt_path = os.path.join(args.snapshot_path,
+                '{{epoch:02d}}'
             )
+    ckpt = tf.train.Checkpoint(model=training_model, optimizer=training_model.optimizer)
+    ckpt.save(ckpt_path)
 
-    training_model.save(
-    model_path,
-    overwrite=True,
-    include_optimizer=True,
-    save_format=None,
-    signatures=None,
-    options=None,
-    save_traces=True,
-)
+    # training_model.save(
+    # model_path,
+    # overwrite=True,
+    # include_optimizer=True,
+    # save_format=None,
+    # signatures=None,
+    # options=None,
+    # save_traces=True,
+
     return model_history
 
 
