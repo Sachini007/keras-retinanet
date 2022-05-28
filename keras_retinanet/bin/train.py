@@ -121,17 +121,6 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
     prediction_model = retinanet_bbox(model=model, anchor_params=anchor_params, pyramid_levels=pyramid_levels)
 
     optimizer = keras.optimizers.Adam(lr=lr, clipnorm=optimizer_clipnorm)
-#     opt_weights = np.load('/content/gdrive/MyDrive/Models/optimizer.npy', allow_pickle=True)
-
-#     with tf.GradientTape() as tape:
-#         tmp = training_model('')
-#         loss = tf.reduce_mean((tmp - tmp)**2)
-
-#     gradients = tape.gradient(loss, training_model.trainable_variables)
-#     optimizer.apply_gradients(zip(gradients, training_model.trainable_variables))
-
-# # set the weights
-#     optimizer.set_weights(opt_weights)
 
     # compile model
     training_model.compile(
@@ -141,6 +130,10 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
         },
         optimizer=optimizer)
     
+    with open('/content/gdrive/MyDrive/Models/optimizer.pkl', 'rb') as f:
+        weight_values = pickle.load(f)
+
+    training_model.optimizer.set_weights(weight_values)
 
     return model, training_model, prediction_model
 
