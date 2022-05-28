@@ -130,12 +130,6 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
         },
         optimizer=optimizer)
 
-    training_model.make_train_function()
-    with open('/content/gdrive/MyDrive/Models/optimizer.pkl', 'rb') as f:
-        weight_values = pickle.load(f)
-
-    training_model.optimizer.set_weights(weight_values)
-
     return model, training_model, prediction_model
 
 
@@ -530,6 +524,7 @@ def main(args=None):
     # print model summary
     print(model.summary())
 
+
     # this lets the generator compute backbone layer shapes using the actual backbone model
     if 'vgg' in args.backbone or 'densenet' in args.backbone:
         train_generator.compute_shapes = make_shapes_callback(model)
@@ -548,6 +543,12 @@ def main(args=None):
     if not args.compute_val_loss:
         validation_generator = None
 
+    training_model.make_train_function()
+    with open('/content/gdrive/MyDrive/Models/optimizer.pkl', 'rb') as f:
+        weight_values = pickle.load(f)
+
+    training_model.optimizer.set_weights(weight_values)
+    
     # start training
     model_history =  training_model.fit_generator(
         generator=train_generator,
