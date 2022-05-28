@@ -207,7 +207,8 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
         cooldown   = 0,
         min_lr     = 0
     ))
-
+    callbacks.append(tf.train.Checkpoint(model=model, optimizer=model.optimizer))
+    
     if args.evaluation and validation_generator:
         callbacks.append(keras.callbacks.EarlyStopping(
             monitor    = 'mAP',
